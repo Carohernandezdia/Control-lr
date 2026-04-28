@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora — Panadería La Reina</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: #f5f3f0; color: #1a1a1a; min-height: 100vh; }
+
+.header { background: #C0392B; color: white; padding: 20px; text-align: center; }
+.header h1 { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.header p { font-size: 12px; opacity: 0.85; margin-top: 3px; }
+
+/* MENU PRINCIPAL */
+.menu { padding: 24px 20px; }
+.menu-title { font-size: 16px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+.menu-btn { display: flex; align-items: center; gap: 16px; background: white; border: 1px solid #e0dbd3; border-radius: 14px; padding: 18px 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s; }
+.menu-btn:active { transform: scale(0.98); }
+.menu-icon { font-size: 32px; flex-shrink: 0; }
+.menu-info { text-align: left; }
+.menu-name { font-size: 16px; font-weight: 700; }
+.menu-desc { font-size: 13px; color: #888; margin-top: 2px; }
+.menu-arrow { margin-left: auto; font-size: 20px; color: #ccc; }
+
+/* PANTALLAS */
+.screen { display: none; }
+.screen.active { display: block; }
+
+.screen-header { background: #C0392B; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+.btn-volver { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-family: ‘DM Sans’, sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+.screen-header-title { font-size: 16px; font-weight: 700; }
+
+.form-body { padding: 20px; padding-bottom: 40px; }
+
+.card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid #e0dbd3; }
+.card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #C0392B; margin-bottom: 14px; }
+
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.field input[type=text], .field input[type=date], .field input[type=time], .field input[type=number], .field select, .field textarea {
+width: 100%; padding: 11px 13px; border: 1.5px solid #ddd; border-radius: 8px;
+font-family: ‘DM Sans’, sans-serif; font-size: 15px; background: #fafafa; -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #C0392B; background: white; }
+.field textarea { min-height: 70px; resize: none; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.opt label { display: block; text-align: center; padding: 10px 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px; font-weight: 600; color: #777; background: #fafafa; cursor: pointer; user-select: none; }
+.opt input:checked + label { border-color: #C0392B; background: #fadbd8; color: #C0392B; }
+
+.check-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0ece6; }
+.check-row:last-child { border-bottom: none; }
+.check-name { font-size: 14px; font-weight: 600; flex: 1; }
+.check-opts { display: flex; gap: 8px; }
+.check-opt { position: relative; }
+.check-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+.check-opt label { display: block; padding: 7px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px; font-weight: 600; color: #777; cursor: pointer; user-select: none; white-space: nowrap; }
+.check-opt input:checked + label.ok { border-color: #27ae60; background: #d5f5e3; color: #1e8449; }
+.check-opt input:checked + label.nov { border-color: #C0392B; background: #fadbd8; color: #C0392B; }
+
+.obs-input { width: 100%; margin-top: 8px; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-family: ‘DM Sans’, sans-serif; font-size: 14px; background: #fafafa; display: none; }
+.obs-input.show { display: block; }
+
+.btn-enviar { width: 100%; padding: 16px; background: #C0392B; color: white; border: none; border-radius: 12px; font-family: ‘DM Sans’, sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(192,57,43,0.3); margin-top: 4px; }
+
+/* GRACIAS */
+.gracias { text-align: center; padding: 60px 20px; }
+.gracias-icon { font-size: 64px; margin-bottom: 16px; }
+.gracias-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.gracias-msg { font-size: 14px; color: #888; margin-bottom: 32px; }
+.btn-volver-menu { padding: 14px 32px; background: #C0392B; color: white; border: none; border-radius: 12px; font-family: ‘DM Sans’, sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* OVERLAY */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+.overlay.show { display: flex; }
+.overlay-box { background: white; border-radius: 16px; padding: 30px 24px; text-align: center; width: 80%; }
+.spinner { width: 44px; height: 44px; border: 4px solid #eee; border-top-color: #C0392B; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <h1>PANADERÍA LA REINA</h1>
+  <p>Bitácoras y Reportes</p>
+</div>
+
+<!-- MENÚ PRINCIPAL -->
+
+<div class="screen active" id="sc-menu">
+  <div class="menu">
+    <div class="menu-title">Selecciona el formulario</div>
+    <div class="menu-btn" onclick="mostrar('sc-moto')">
+      <div class="menu-icon">🏍️</div>
+      <div class="menu-info">
+        <div class="menu-name">Revisión semanal moto</div>
+        <div class="menu-desc">CT100 — Estado general cada semana</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-btn" onclick="mostrar('sc-bodega')">
+      <div class="menu-icon">📦</div>
+      <div class="menu-info">
+        <div class="menu-name">Reporte de bodega</div>
+        <div class="menu-desc">Estado y organización del turno</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-btn" onclick="mostrar('sc-novedad')">
+      <div class="menu-icon">⚠️</div>
+      <div class="menu-info">
+        <div class="menu-name">Reporte de novedad</div>
+        <div class="menu-desc">Moto, bodega o cualquier incidente</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ -->
+
+<!-- BITÁCORA MOTO -->
+
+<!-- ═══════════════════════════ -->
+
+<div class="screen" id="sc-moto">
+  <div class="screen-header">
+    <button class="btn-volver" onclick="mostrar('sc-menu')">← Volver</button>
+    <div class="screen-header-title">🏍️ Revisión Semanal Moto</div>
+  </div>
+  <div class="form-body">
+
+
+<div class="card">
+  <div class="card-title">Información general</div>
+  <div class="field">
+    <label>Nombre del responsable</label>
+    <input type="text" id="m-responsable" placeholder="Tu nombre">
+  </div>
+  <div class="field">
+    <label>Fecha de revisión</label>
+    <input type="date" id="m-fecha">
+  </div>
+  <div class="field">
+    <label>Lectura del tacómetro (km)</label>
+    <input type="number" id="m-tacometro" placeholder="Ej: 12450" inputmode="numeric">
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Estado de la moto</div>
+
+  <div class="check-row">
+    <div class="check-name">🛢️ Revisó el aceite</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="m-aceite-reviso" id="mar-si" value="Sí"><label for="mar-si" class="ok">Sí</label></div>
+      <div class="check-opt"><input type="radio" name="m-aceite-reviso" id="mar-no" value="No"><label for="mar-no" class="nov">No</label></div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="check-name">🛢️ Nivel de aceite</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="m-aceite-nivel" id="man-bien" value="Bien"><label for="man-bien" class="ok">Bien</label></div>
+      <div class="check-opt"><input type="radio" name="m-aceite-nivel" id="man-bajo" value="Bajo"><label for="man-bajo" class="nov">Bajo</label></div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="check-name">⛓️ Cadena</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="m-cadena" id="mc-bien" value="Bien"><label for="mc-bien" class="ok">Bien</label></div>
+      <div class="check-opt"><input type="radio" name="m-cadena" id="mc-tension" value="Necesita tensión"><label for="mc-tension" class="nov">Tensión</label></div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="check-name">🔵 Llantas</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="m-llantas" id="ml-bien" value="Bien"><label for="ml-bien" class="ok">Bien</label></div>
+      <div class="check-opt"><input type="radio" name="m-llantas" id="ml-desg" value="Desgastadas"><label for="ml-desg" class="nov">Desgaste</label></div>
+      <div class="check-opt"><input type="radio" name="m-llantas" id="ml-pinch" value="Pinchada"><label for="ml-pinch" class="nov">Pinchada</label></div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="check-name">🔍 Rayones / daños nuevos</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="m-rayones" id="mray-no" value="No" onchange="toggleObs('m-rayones-desc', false)"><label for="mray-no" class="ok">No</label></div>
+      <div class="check-opt"><input type="radio" name="m-rayones" id="mray-si" value="Sí" onchange="toggleObs('m-rayones-desc', true)"><label for="mray-si" class="nov">Sí</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="m-rayones-desc" placeholder="Describa el daño o rayón...">
+</div>
+
+<div class="card">
+  <div class="field">
+    <label>Observaciones generales</label>
+    <textarea id="m-observaciones" placeholder="Algo más que reportar..."></textarea>
+  </div>
+</div>
+
+<button class="btn-enviar" onclick="enviarMoto()">Enviar revisión ✓</button>
+
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ -->
+
+<!-- REPORTE BODEGA -->
+
+<!-- ═══════════════════════════ -->
+
+<div class="screen" id="sc-bodega">
+  <div class="screen-header">
+    <button class="btn-volver" onclick="mostrar('sc-menu')">← Volver</button>
+    <div class="screen-header-title">📦 Reporte de Bodega</div>
+  </div>
+  <div class="form-body">
+
+
+<div class="card">
+  <div class="card-title">Información general</div>
+  <div class="field">
+    <label>Responsable</label>
+    <input type="text" id="b-responsable" placeholder="Tu nombre">
+  </div>
+  <div class="field">
+    <label>Fecha</label>
+    <input type="date" id="b-fecha">
+  </div>
+  <div class="field">
+    <label>Turno</label>
+    <div class="grid2">
+      <div class="opt"><input type="radio" name="b-turno" id="bt-m" value="Mañana"><label for="bt-m">🌅 Mañana</label></div>
+      <div class="opt"><input type="radio" name="b-turno" id="bt-t" value="Tarde"><label for="bt-t">🌆 Tarde</label></div>
+      <div class="opt"><input type="radio" name="b-turno" id="bt-c" value="Completo"><label for="bt-c">📅 Completo</label></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Estado de organización</div>
+
+  <div class="check-row">
+    <div class="check-name">¿Organizó la bodega hoy?</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-organizo" id="bo-si" value="Sí" onchange="toggleObs('b-hora-organizo-wrap', true)"><label for="bo-si" class="ok">Sí</label></div>
+      <div class="check-opt"><input type="radio" name="b-organizo" id="bo-no" value="No" onchange="toggleObs('b-hora-organizo-wrap', false)"><label for="bo-no" class="nov">No</label></div>
+    </div>
+  </div>
+  <input type="time" class="obs-input" id="b-hora-organizo-wrap" placeholder="Hora en que organizó">
+
+  <div class="check-row">
+    <div class="check-name">¿La encontró organizada al llegar?</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-encontro" id="be-si" value="Sí"><label for="be-si" class="ok">Sí</label></div>
+      <div class="check-opt"><input type="radio" name="b-encontro" id="be-no" value="No"><label for="be-no" class="nov">No</label></div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="check-name">¿Alguien la desorganizó después?</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-desorganizo" id="bd-si" value="Sí" onchange="toggleObs('b-quien-wrap', true)"><label for="bd-si" class="nov">Sí</label></div>
+      <div class="check-opt"><input type="radio" name="b-desorganizo" id="bd-no" value="No" onchange="toggleObs('b-quien-wrap', false)"><label for="bd-no" class="ok">No</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-quien-wrap" placeholder="¿Quién o qué área?">
+</div>
+
+<div class="card">
+  <div class="card-title">Ítems de verificación</div>
+
+  <div class="check-row">
+    <div class="check-name">Estanterías ordenadas</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-estanterias" id="bes-ok" value="OK" onchange="toggleObs('b-est-obs', false)"><label for="bes-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-estanterias" id="bes-nov" value="Novedad" onchange="toggleObs('b-est-obs', true)"><label for="bes-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-est-obs" placeholder="Observación...">
+
+  <div class="check-row">
+    <div class="check-name">Productos vencidos retirados</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-vencidos" id="bv-ok" value="OK" onchange="toggleObs('b-ven-obs', false)"><label for="bv-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-vencidos" id="bv-nov" value="Novedad" onchange="toggleObs('b-ven-obs', true)"><label for="bv-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-ven-obs" placeholder="¿Cuáles y cuántos?">
+
+  <div class="check-row">
+    <div class="check-name">Insumos en su lugar</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-insumos" id="bi-ok" value="OK" onchange="toggleObs('b-ins-obs', false)"><label for="bi-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-insumos" id="bi-nov" value="Novedad" onchange="toggleObs('b-ins-obs', true)"><label for="bi-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-ins-obs" placeholder="Observación...">
+
+  <div class="check-row">
+    <div class="check-name">Pasillos despejados</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-pasillos" id="bp-ok" value="OK" onchange="toggleObs('b-pas-obs', false)"><label for="bp-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-pasillos" id="bp-nov" value="Novedad" onchange="toggleObs('b-pas-obs', true)"><label for="bp-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-pas-obs" placeholder="Observación...">
+
+  <div class="check-row">
+    <div class="check-name">Limpieza general</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-limpieza" id="bl-ok" value="OK" onchange="toggleObs('b-lim-obs', false)"><label for="bl-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-limpieza" id="bl-nov" value="Novedad" onchange="toggleObs('b-lim-obs', true)"><label for="bl-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-lim-obs" placeholder="Observación...">
+
+  <div class="check-row">
+    <div class="check-name">Productos recibidos registrados</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-recibidos" id="br-ok" value="OK" onchange="toggleObs('b-rec-obs', false)"><label for="br-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-recibidos" id="br-nov" value="Novedad" onchange="toggleObs('b-rec-obs', true)"><label for="br-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-rec-obs" placeholder="Observación...">
+
+  <div class="check-row">
+    <div class="check-name">Puerta / candado en buen estado</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="b-puerta" id="bpu-ok" value="OK" onchange="toggleObs('b-pue-obs', false)"><label for="bpu-ok" class="ok">OK</label></div>
+      <div class="check-opt"><input type="radio" name="b-puerta" id="bpu-nov" value="Novedad" onchange="toggleObs('b-pue-obs', true)"><label for="bpu-nov" class="nov">Novedad</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="b-pue-obs" placeholder="Observación...">
+</div>
+
+<div class="card">
+  <div class="field">
+    <label>Descripción de novedades adicionales</label>
+    <textarea id="b-novedad-desc" placeholder="Detalle cualquier novedad importante..."></textarea>
+  </div>
+</div>
+
+<button class="btn-enviar" onclick="enviarBodega()">Enviar reporte ✓</button>
+
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ -->
+
+<!-- REPORTE NOVEDAD -->
+
+<!-- ═══════════════════════════ -->
+
+<div class="screen" id="sc-novedad">
+  <div class="screen-header">
+    <button class="btn-volver" onclick="mostrar('sc-menu')">← Volver</button>
+    <div class="screen-header-title">⚠️ Reporte de Novedad</div>
+  </div>
+  <div class="form-body">
+
+
+<div class="card">
+  <div class="card-title">Información</div>
+  <div class="field">
+    <label>Nombre del responsable</label>
+    <input type="text" id="n-responsable" placeholder="Tu nombre">
+  </div>
+  <div class="field">
+    <label>Fecha</label>
+    <input type="date" id="n-fecha">
+  </div>
+  <div class="field">
+    <label>Hora aprox.</label>
+    <input type="time" id="n-hora">
+  </div>
+  <div class="field">
+    <label>Área</label>
+    <div class="grid2">
+      <div class="opt"><input type="radio" name="n-area" id="na-moto" value="Moto"><label for="na-moto">🏍️ Moto</label></div>
+      <div class="opt"><input type="radio" name="n-area" id="na-bodega" value="Bodega"><label for="na-bodega">📦 Bodega</label></div>
+      <div class="opt"><input type="radio" name="n-area" id="na-otro" value="Otro"><label for="na-otro">🔧 Otro</label></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Tipo de novedad</div>
+  <div class="field">
+    <div class="grid2">
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-pinch" value="Pinchazo"><label for="nt-pinch">🔵 Pinchazo</label></div>
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-acc" value="Accidente"><label for="nt-acc">💥 Accidente</label></div>
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-mec" value="Falla mecánica"><label for="nt-mec">🔧 Falla mecánica</label></div>
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-des" value="Desorden"><label for="nt-des">📦 Desorden</label></div>
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-rob" value="Robo/Pérdida"><label for="nt-rob">🚨 Robo/Pérdida</label></div>
+      <div class="opt"><input type="radio" name="n-tipo" id="nt-otro" value="Otro"><label for="nt-otro">📋 Otro</label></div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Descripción detallada</label>
+    <textarea id="n-descripcion" placeholder="Describe qué pasó, dónde y cómo..."></textarea>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Si fue al taller</div>
+  <div class="check-row">
+    <div class="check-name">¿Fue al taller?</div>
+    <div class="check-opts">
+      <div class="check-opt"><input type="radio" name="n-taller" id="ntall-si" value="Sí" onchange="toggleObs('n-costo-wrap', true)"><label for="ntall-si" class="ok">Sí</label></div>
+      <div class="check-opt"><input type="radio" name="n-taller" id="ntall-no" value="No" onchange="toggleObs('n-costo-wrap', false)"><label for="ntall-no" class="nov">No</label></div>
+    </div>
+  </div>
+  <input type="text" class="obs-input" id="n-costo-wrap" placeholder="Costo del taller ($)" inputmode="numeric">
+</div>
+
+<button class="btn-enviar" onclick="enviarNovedad()">Enviar novedad ✓</button>
+
+
+  </div>
+</div>
+
+<!-- GRACIAS -->
+
+<div class="screen" id="sc-gracias">
+  <div class="gracias">
+    <div class="gracias-icon">✅</div>
+    <div class="gracias-title">¡Reporte enviado!</div>
+    <div class="gracias-msg">Quedó registrado en el sistema.<br>Gracias por mantener el control.</div>
+    <button class="btn-volver-menu" onclick="mostrar('sc-menu')">Volver al menú</button>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <div class="spinner"></div>
+    <div style="font-size:15px;font-weight:700;">Enviando reporte...</div>
+  </div>
+</div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZWqcME477vY4tYZ-xzjsb6M5C9RU-lKQ-R2wL6jctSgAXwdojRSJXBRTEbm-mvLKG/exec';
+
+function mostrar(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toggleObs(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('show', show);
+}
+
+function radio(name) {
+  var el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : '-';
+}
+
+function setFechasHoy() {
+  var hoy = new Date().toISOString().split('T')[0];
+  ['m-fecha','b-fecha','n-fecha'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = hoy;
+  });
+  var ahora = new Date().toTimeString().slice(0,5);
+  var nh = document.getElementById('n-hora');
+  if (nh) nh.value = ahora;
+}
+
+async function enviar(datos) {
+  document.getElementById('overlay').classList.add('show');
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+  } catch(e) { console.log(e); }
+  document.getElementById('overlay').classList.remove('show');
+  mostrar('sc-gracias');
+}
+
+async function enviarMoto() {
+  var datos = {
+    tipo: 'bitacora',
+    fecha: document.getElementById('m-fecha').value,
+    responsable: document.getElementById('m-responsable').value || '-',
+    aceite_reviso: radio('m-aceite-reviso'),
+    aceite_nivel: radio('m-aceite-nivel'),
+    cadena: radio('m-cadena'),
+    llantas: radio('m-llantas'),
+    rayones: radio('m-rayones'),
+    rayones_desc: document.getElementById('m-rayones-desc').value || '-',
+    tacometro: document.getElementById('m-tacometro').value || '-',
+    observaciones: document.getElementById('m-observaciones').value || '-'
+  };
+  await enviar(datos);
+}
+
+async function enviarBodega() {
+  var datos = {
+    tipo: 'bodega',
+    fecha: document.getElementById('b-fecha').value,
+    responsable: document.getElementById('b-responsable').value || '-',
+    turno: radio('b-turno'),
+    organizo: radio('b-organizo'),
+    hora_organizo: document.getElementById('b-hora-organizo-wrap').value || '-',
+    encontro_organizada: radio('b-encontro'),
+    desorganizaron: radio('b-desorganizo'),
+    quien_desorganizo: document.getElementById('b-quien-wrap').value || '-',
+    estanterias: radio('b-estanterias'),
+    estanterias_obs: document.getElementById('b-est-obs').value || '-',
+    vencidos: radio('b-vencidos'),
+    vencidos_obs: document.getElementById('b-ven-obs').value || '-',
+    insumos: radio('b-insumos'),
+    insumos_obs: document.getElementById('b-ins-obs').value || '-',
+    pasillos: radio('b-pasillos'),
+    pasillos_obs: document.getElementById('b-pas-obs').value || '-',
+    limpieza: radio('b-limpieza'),
+    limpieza_obs: document.getElementById('b-lim-obs').value || '-',
+    productos_recibidos: radio('b-recibidos'),
+    productos_obs: document.getElementById('b-rec-obs').value || '-',
+    puerta: radio('b-puerta'),
+    puerta_obs: document.getElementById('b-pue-obs').value || '-',
+    novedad_desc: document.getElementById('b-novedad-desc').value || '-'
+  };
+  await enviar(datos);
+}
+
+async function enviarNovedad() {
+  var datos = {
+    tipo: 'novedad',
+    fecha: document.getElementById('n-fecha').value,
+    hora: document.getElementById('n-hora').value || '-',
+    responsable: document.getElementById('n-responsable').value || '-',
+    area: radio('n-area'),
+    tipo_novedad: radio('n-tipo'),
+    descripcion: document.getElementById('n-descripcion').value || '-',
+    taller: radio('n-taller'),
+    costo: document.getElementById('n-costo-wrap').value || '-'
+  };
+  await enviar(datos);
+}
+
+setFechasHoy();
+</script>
+
+</body>
+</html>

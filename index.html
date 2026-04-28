@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Administradora — La Reina</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#C0392B; --red-l:#FADBD8;
+  --dark:#1a1a1a; --gray:#6b7280;
+  --light:#f8f6f3; --white:#fff;
+  --border:#e5e0d8; --gold:#D4AC0D; --gold-l:#FEF9E7;
+  --blue:#1A5276; --blue-l:#D6EAF8;
+  --green:#1E8449; --green-l:#D5F5E3;
+  --purple:#6c3483; --purple-l:#F4ECF7;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--dark);min-height:100vh;}
+
+.header{background:var(--red);padding:28px 20px 22px;color:white;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.06);border-radius:50%;}
+.header-brand{font-family:'Playfair Display',serif;font-size:14px;font-weight:900;letter-spacing:2px;opacity:.8;text-transform:uppercase;}
+.header-title{font-size:26px;font-weight:700;margin-top:6px;line-height:1.1;}
+.header-sub{font-size:13px;opacity:.75;margin-top:6px;font-weight:300;}
+.header-date{font-size:12px;opacity:.6;margin-top:8px;}
+
+.screen{display:none;animation:fadeIn 0.3s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* MENU */
+.menu-wrap{padding:20px 16px 30px;}
+.menu-greeting{font-size:15px;color:var(--gray);margin-bottom:20px;font-weight:500;}
+.menu-greeting span{color:var(--dark);font-weight:700;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.menu-card{background:white;border-radius:14px;border:1px solid var(--border);padding:18px 14px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:flex-start;gap:10px;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.menu-card:active{transform:scale(0.97);}
+.menu-card .card-icon{font-size:28px;}
+.menu-card .card-title{font-size:14px;font-weight:700;color:var(--dark);line-height:1.2;}
+.menu-card .card-sub{font-size:11px;color:var(--gray);font-weight:400;}
+.menu-card.full{grid-column:span 2;flex-direction:row;align-items:center;gap:14px;}
+.menu-card.full .card-icon{font-size:32px;}
+.card-checklist{border-top:4px solid var(--gold);}
+.card-desempeno{border-top:4px solid var(--red);}
+.card-entrevista{border-top:4px solid var(--blue);}
+.card-solicitud{border-top:4px solid var(--purple);}
+
+/* SUB HEADER */
+.sub-header{display:flex;align-items:center;gap:12px;padding:16px 18px;background:white;border-bottom:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,0.04);position:sticky;top:0;z-index:50;}
+.btn-back{width:36px;height:36px;border-radius:8px;background:var(--light);border:1px solid var(--border);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sub-title{font-size:16px;font-weight:700;color:var(--dark);}
+.sub-body{padding:16px;padding-bottom:100px;}
+
+/* BLOQUES CHECKLIST */
+.block{margin-bottom:12px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:white;}
+.block-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;}
+.block-icon{font-size:20px;}
+.block-title{font-size:14px;font-weight:700;flex:1;}
+.block-prog{font-size:11px;font-weight:600;opacity:.7;}
+.block-arrow{font-size:11px;transition:transform 0.25s;color:var(--gray);}
+.block-arrow.open{transform:rotate(180deg);}
+.block-items{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
+.block-items.open{max-height:3000px;}
+.check-item{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;border-top:1px solid var(--border);cursor:pointer;user-select:none;transition:background 0.1s;}
+.check-item:active{background:var(--light);}
+.chk{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:1px;}
+.chk.on{background:var(--green);border-color:var(--green);}
+.chk.on::after{content:'✓';color:white;font-size:13px;font-weight:700;}
+.chk-label{font-size:13px;color:var(--dark);line-height:1.4;flex:1;transition:all 0.15s;}
+.chk-label.done{color:var(--gray);text-decoration:line-through;}
+.bh-gold{background:#fffbee;} .bh-gold .block-title{color:#9a7d0a;}
+.bh-blue{background:#edf4fb;} .bh-blue .block-title{color:var(--blue);}
+.bh-teal{background:#eaf7fb;} .bh-teal .block-title{color:#117a8b;}
+.bh-red{background:#fdf2f1;}  .bh-red .block-title{color:var(--red);}
+.bh-green{background:#eafaf1;}.bh-green .block-title{color:var(--green);}
+.bh-purple{background:#f5eef8;}.bh-purple .block-title{color:var(--purple);}
+
+/* PROGRESS */
+.prog-bar-wrap{background:white;padding:11px 16px 10px;border-bottom:1px solid var(--border);}
+.prog-top{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:500;}
+.pbar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;}
+.pfill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:99px;transition:width 0.4s;}
+
+/* FORMS */
+.form-card{background:white;border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.f-label{font-size:12px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:block;}
+.f-input,.f-select,.f-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);background:var(--light);-webkit-appearance:none;}
+.f-input:focus,.f-select:focus,.f-textarea:focus{outline:none;border-color:var(--red);background:white;}
+.f-textarea{resize:none;min-height:70px;}
+.f-field{margin-bottom:14px;}
+.f-field:last-child{margin-bottom:0;}
+
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opts-grid.one{grid-template-columns:1fr;}
+.opt-btn{position:relative;}
+.opt-btn input{position:absolute;opacity:0;width:0;height:0;}
+.opt-btn label{display:block;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;color:var(--gray);cursor:pointer;text-align:center;background:var(--light);margin:0;transition:all 0.15s;user-select:none;line-height:1.3;}
+.opt-btn input:checked+label{border-color:var(--red);background:var(--red-l);color:var(--red);font-weight:600;}
+
+.star-row{display:flex;gap:6px;justify-content:center;margin-top:8px;}
+.star{width:40px;height:40px;border:1.5px solid var(--border);border-radius:8px;background:var(--light);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.star.on{border-color:var(--gold);background:var(--gold-l);}
+.star-val{text-align:center;font-size:11px;color:var(--gray);margin-top:6px;font-weight:500;}
+
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray);padding:10px 0 6px;}
+.info-box{background:var(--blue-l);border:1.5px solid #aac9e0;border-radius:8px;padding:11px 13px;font-size:13px;color:var(--blue);line-height:1.5;margin-bottom:14px;}
+.warn-box{background:var(--red-l);border:1.5px solid #e8a8a0;border-radius:8px;padding:11px 13px;font-size:13px;color:var(--red);line-height:1.5;margin-bottom:14px;font-weight:600;}
+
+/* PREGUNTAS ESPECIFICAS */
+.q-card{background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.q-num{display:inline-block;background:var(--red);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.5px;margin-bottom:6px;}
+.q-text{font-size:14px;font-weight:600;color:var(--dark);margin-bottom:12px;line-height:1.4;}
+.q-body{padding:14px;}
+.q-opts{display:flex;flex-direction:column;gap:7px;}
+.q-opt{position:relative;}
+.q-opt input{position:absolute;opacity:0;width:0;height:0;}
+.q-opt label{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--gray);cursor:pointer;background:var(--light);margin:0;transition:all 0.15s;user-select:none;line-height:1.4;}
+.q-opt label .ql{font-weight:700;color:var(--red);min-width:16px;font-size:12px;}
+.q-opt input:checked+label{border-color:var(--red);background:var(--red-l);color:var(--dark);font-weight:500;}
+
+.btn-send{position:fixed;bottom:16px;left:16px;right:16px;padding:15px;background:var(--red);color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(192,57,43,0.35);z-index:200;}
+.btn-send:disabled{opacity:.6;}
+
+.gracias{text-align:center;padding:60px 24px;}
+.gracias-icon{font-size:60px;margin-bottom:16px;}
+.gracias-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--red);margin-bottom:8px;}
+.gracias-msg{font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:28px;}
+.btn-volver{width:100%;padding:14px;background:white;color:var(--dark);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* CARGO SELECTOR */
+.cargo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;}
+.cargo-btn{position:relative;}
+.cargo-btn input{position:absolute;opacity:0;width:0;height:0;}
+.cargo-btn label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:2px solid var(--border);border-radius:12px;cursor:pointer;background:white;margin:0;transition:all 0.15s;user-select:none;text-align:center;}
+.cargo-btn label .ci{font-size:26px;}
+.cargo-btn label .cn{font-size:13px;font-weight:700;color:var(--dark);}
+.cargo-btn label .cs{font-size:11px;color:var(--gray);}
+.cargo-btn input:checked+label{border-color:var(--red);background:var(--red-l);}
+.cargo-btn input:checked+label .cn{color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- ═══════ MENÚ PRINCIPAL ═══════ -->
+<div class="screen active" id="s-menu">
+  <div class="header">
+    <div class="header-brand">Panadería La Reina</div>
+    <div class="header-title">Panel Administradora</div>
+    <div class="header-sub">Gestión diaria del negocio</div>
+    <div class="header-date" id="fecha-header"></div>
+  </div>
+  <div class="menu-wrap">
+    <div class="menu-greeting">Bienvenida — <span>¿Qué vamos a gestionar hoy?</span></div>
+    <div class="menu-grid">
+      <div class="menu-card card-checklist full" onclick="go('s-checklist')">
+        <div class="card-icon">✅</div>
+        <div><div class="card-title">Checklist del Día</div><div class="card-sub">Apertura · Jornada · Cierre · Reporte</div></div>
+      </div>
+      <div class="menu-card card-desempeno" onclick="go('s-desempeno')">
+        <div class="card-icon">⭐</div>
+        <div class="card-title">Evaluación de Desempeño</div>
+        <div class="card-sub">Calificar colaborador</div>
+      </div>
+      <div class="menu-card card-entrevista" onclick="go('s-entrevista-cargo')">
+        <div class="card-icon">👤</div>
+        <div class="card-title">Entrevista Laboral</div>
+        <div class="card-sub">Por área y cargo</div>
+      </div>
+      <div class="menu-card card-solicitud full" onclick="go('s-solicitud')">
+        <div class="card-icon">📝</div>
+        <div><div class="card-title">Solicitudes y Reportes</div><div class="card-sub">Memorando · Llamado de atención · Reunión · Novedad</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CHECKLIST ═══════ -->
+<div class="screen" id="s-checklist">
+  <div class="sub-header">
+    <button class="btn-back" onclick="go('s-menu')">←</button>
+    <div class="sub-title">✅ Checklist del Día</div>
+  </div>
+  <div class="prog-bar-wrap">
+    <div class="prog-top"><span id="ck-txt">0 de 0 tareas completadas</span><span id="ck-pct">0%</span></div>
+    <div class="pbar"><div class="pfill" id="ck-fill"></div></div>
+  </div>
+  <div class="sub-body" id="checklist-body"></div>
+  <div id="gracias-ck" class="gracias" style="display:none;padding-top:40px;">
+    <div class="gracias-icon">✅</div>
+    <div class="gracias-title">¡Checklist enviado!</div>
+    <div class="gracias-msg">El reporte del día fue enviado al correo de La Reina.</div>
+    <button class="btn-volver" onclick="resetChecklist()">Nuevo checklist</button>
+  </div>
+  <button class="btn-send" id="btn-ck" onclick="enviarChecklist()">Enviar reporte del día →</button>
+</div>
+
+<!-- ═══════ EVALUACIÓN DESEMPEÑO ═══════ -->
+<div class="screen" id="s-desempeno">
+  <div class="sub-header">
+    <button class="btn-back" onclick="go('s-menu')">←</button>
+    <div class="sub-title">⭐ Evaluación de Desempeño</div>
+  </div>
+  <div class="sub-body">
+    <div class="form-card">
+      <div class="f-field"><label class="f-label">Nombre del colaborador</label><input type="text" class="f-input" id="d-nombre" placeholder="Nombre completo"></div>
+      <div class="f-field">
+        <label class="f-label">Cargo</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc1" value="Mesera"><label for="dc1">👩‍💼 Mesera</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc2" value="Cocinera"><label for="dc2">👩‍🍳 Cocinera</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc3" value="Cajera"><label for="dc3">🧾 Cajera</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc4" value="Panaderia"><label for="dc4">🥐 Panadería</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc5" value="Fritos"><label for="dc5">🍟 Fritos</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc6" value="Omelera"><label for="dc6">🍳 Omelera</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc7" value="Aseo"><label for="dc7">🧹 Aseo</label></div>
+          <div class="opt-btn"><input type="radio" name="d-cargo" id="dc8" value="Domicilios"><label for="dc8">🏍️ Domicilios</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="section-label">Calificación 1 al 5 ★</div>
+      <div id="estrellas-wrap"></div>
+    </div>
+    <div class="form-card">
+      <div class="f-field"><label class="f-label">Observaciones</label><textarea class="f-textarea" id="d-obs" placeholder="Fortalezas, áreas de mejora, situaciones del día..."></textarea></div>
+      <div class="f-field">
+        <label class="f-label">¿Requiere acción?</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="d-accion" id="da1" value="No, todo bien"><label for="da1">✅ Todo bien</label></div>
+          <div class="opt-btn"><input type="radio" name="d-accion" id="da2" value="Seguimiento"><label for="da2">👁️ Seguimiento</label></div>
+          <div class="opt-btn"><input type="radio" name="d-accion" id="da3" value="Llamado de atención"><label for="da3">⚠️ Llamado</label></div>
+          <div class="opt-btn"><input type="radio" name="d-accion" id="da4" value="Reunión requerida"><label for="da4">📋 Reunión</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-send" id="btn-d" onclick="enviarDesempeno()">Enviar evaluación →</button>
+</div>
+
+<!-- ═══════ ENTREVISTA — PASO 1: SELECCIONAR CARGO ═══════ -->
+<div class="screen" id="s-entrevista-cargo">
+  <div class="sub-header">
+    <button class="btn-back" onclick="go('s-menu')">←</button>
+    <div class="sub-title">👤 Entrevista — Seleccionar área</div>
+  </div>
+  <div class="sub-body">
+    <div class="info-box">Seleccione el área para la cual está entrevistando. Las preguntas y criterios se adaptarán automáticamente.</div>
+    <div class="cargo-grid">
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar1" value="atencion_cliente" onchange="selCargo(this)"><label for="ar1"><span class="ci">👩‍💼</span><span class="cn">Atención al Cliente</span><span class="cs">Mesera / Salón</span></label></div>
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar2" value="cocina" onchange="selCargo(this)"><label for="ar2"><span class="ci">👩‍🍳</span><span class="cn">Cocina</span><span class="cs">Preparación alimentos</span></label></div>
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar3" value="bebidas" onchange="selCargo(this)"><label for="ar3"><span class="ci">☕</span><span class="cn">Preparación Bebidas</span><span class="cs">Bebidas y cafetería</span></label></div>
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar4" value="vitrinas" onchange="selCargo(this)"><label for="ar4"><span class="ci">🥐</span><span class="cn">Vitrinas</span><span class="cs">Exhibición y ventas</span></label></div>
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar5" value="caja" onchange="selCargo(this)"><label for="ar5"><span class="ci">🧾</span><span class="cn">Caja</span><span class="cs">Cobro y supervisión</span></label></div>
+      <div class="cargo-btn"><input type="radio" name="area-cargo" id="ar6" value="aseo" onchange="selCargo(this)"><label for="ar6"><span class="ci">🧹</span><span class="cn">Aseo</span><span class="cs">Servicios generales</span></label></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ENTREVISTA — PASO 2: FORMULARIO COMPLETO ═══════ -->
+<div class="screen" id="s-entrevista">
+  <div class="sub-header">
+    <button class="btn-back" onclick="go('s-entrevista-cargo')">←</button>
+    <div class="sub-title" id="e-sub-title">👤 Entrevista</div>
+  </div>
+  <div class="sub-body">
+
+    <!-- DATOS BÁSICOS -->
+    <div class="form-card">
+      <div class="section-label">Datos personales</div>
+      <div class="f-field"><label class="f-label">Nombre completo</label><input type="text" class="f-input" id="e-nombre" placeholder="Nombre y apellidos"></div>
+      <div class="f-field"><label class="f-label">Celular</label><input type="text" class="f-input" id="e-tel" placeholder="Número de contacto" inputmode="numeric"></div>
+      <div class="f-field"><label class="f-label">Edad</label><input type="number" class="f-input" id="e-edad" placeholder="Ej: 25" min="15" max="70"></div>
+      <div class="f-field">
+        <label class="f-label">Número de hijos</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-hijos" id="eh0" value="Ninguno"><label for="eh0">Ninguno</label></div>
+          <div class="opt-btn"><input type="radio" name="e-hijos" id="eh1" value="1"><label for="eh1">1</label></div>
+          <div class="opt-btn"><input type="radio" name="e-hijos" id="eh2" value="2"><label for="eh2">2</label></div>
+          <div class="opt-btn"><input type="radio" name="e-hijos" id="eh3" value="3 o más"><label for="eh3">3+</label></div>
+        </div>
+      </div>
+      <div class="f-field"><label class="f-label">Edades de los hijos (si aplica)</label><input type="text" class="f-input" id="e-edades" placeholder="Ej: 3, 7 años"></div>
+      <div class="f-field">
+        <label class="f-label">Estado civil</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-estado" id="ees1" value="Soltera"><label for="ees1">Soltera</label></div>
+          <div class="opt-btn"><input type="radio" name="e-estado" id="ees2" value="Casada"><label for="ees2">Casada</label></div>
+          <div class="opt-btn"><input type="radio" name="e-estado" id="ees3" value="Unión libre"><label for="ees3">Unión libre</label></div>
+          <div class="opt-btn"><input type="radio" name="e-estado" id="ees4" value="Separada"><label for="ees4">Separada</label></div>
+        </div>
+      </div>
+      <div class="f-field">
+        <label class="f-label">Transporte</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-trans" id="et1" value="Vehículo propio"><label for="et1">🚗 Propio</label></div>
+          <div class="opt-btn"><input type="radio" name="e-trans" id="et2" value="Moto"><label for="et2">🏍️ Moto</label></div>
+          <div class="opt-btn"><input type="radio" name="e-trans" id="et3" value="Transporte público"><label for="et3">🚌 Público</label></div>
+          <div class="opt-btn"><input type="radio" name="e-trans" id="et4" value="Vive cerca"><label for="et4">🚶 Cerca</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPONIBILIDAD -->
+    <div class="form-card">
+      <div class="section-label">Disponibilidad</div>
+      <div class="info-box">Los turnos son rotativos: mañana (6:00 a.m.) y tarde (1:00 p.m.) según necesidad del negocio.</div>
+      <div class="f-field">
+        <label class="f-label">¿Inconveniente con turnos rotativos?</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-turno" id="etu1" value="Sin inconveniente"><label for="etu1">✅ Ninguno</label></div>
+          <div class="opt-btn"><input type="radio" name="e-turno" id="etu2" value="Con restricción"><label for="etu2">⚠️ Sí tiene</label></div>
+        </div>
+      </div>
+      <div class="f-field" id="rest-wrap" style="display:none"><label class="f-label">¿Cuál restricción?</label><input type="text" class="f-input" id="e-restriccion" placeholder="Explique..."></div>
+      <div class="f-field">
+        <label class="f-label">¿Puede trabajar fines de semana?</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-fds" id="ef1" value="Sin problema"><label for="ef1">✅ Sin problema</label></div>
+          <div class="opt-btn"><input type="radio" name="e-fds" id="ef2" value="No puede"><label for="ef2">❌ No puede</label></div>
+          <div class="opt-btn"><input type="radio" name="e-fds" id="ef3" value="Solo sábados"><label for="ef3">Solo sábados</label></div>
+          <div class="opt-btn"><input type="radio" name="e-fds" id="ef4" value="A conversar"><label for="ef4">A conversar</label></div>
+        </div>
+      </div>
+      <div class="f-field">
+        <label class="f-label">¿Cuándo puede empezar?</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-inicio" id="ei1" value="De inmediato"><label for="ei1">De inmediato</label></div>
+          <div class="opt-btn"><input type="radio" name="e-inicio" id="ei2" value="Esta semana"><label for="ei2">Esta semana</label></div>
+          <div class="opt-btn"><input type="radio" name="e-inicio" id="ei3" value="En 15 días"><label for="ei3">En 15 días</label></div>
+          <div class="opt-btn"><input type="radio" name="e-inicio" id="ei4" value="En un mes"><label for="ei4">En un mes</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPERIENCIA -->
+    <div class="form-card">
+      <div class="section-label">Experiencia laboral</div>
+      <div class="f-field">
+        <label class="f-label">¿Tiene experiencia en el área?</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-exp" id="ee1" value="Sí" onchange="toggleExp()"><label for="ee1">✅ Sí</label></div>
+          <div class="opt-btn"><input type="radio" name="e-exp" id="ee2" value="No" onchange="toggleExp()"><label for="ee2">❌ Primera vez</label></div>
+        </div>
+      </div>
+      <div id="exp-det" style="display:none">
+        <div class="f-field"><label class="f-label">Último lugar donde trabajó</label><input type="text" class="f-input" id="e-ult" placeholder="Nombre del negocio o empresa"></div>
+        <div class="f-field">
+          <label class="f-label">¿Cuánto tiempo duró?</label>
+          <select class="f-select" id="e-dur">
+            <option value="">Seleccionar...</option>
+            <option>Menos de 3 meses</option>
+            <option>3 a 6 meses</option>
+            <option>6 meses a 1 año</option>
+            <option>1 a 2 años</option>
+            <option>Más de 2 años</option>
+          </select>
+        </div>
+        <div class="f-field"><label class="f-label">¿Por qué se retiró?</label><textarea class="f-textarea" id="e-motivo" placeholder="Breve explicación..."></textarea></div>
+        <div class="f-field"><label class="f-label">Referencia laboral (nombre y teléfono)</label><input type="text" class="f-input" id="e-ref" placeholder="Ej: María González — 310 000 0000"></div>
+      </div>
+    </div>
+
+    <!-- PREGUNTAS ESPECÍFICAS POR CARGO -->
+    <div class="form-card" id="preguntas-cargo-wrap">
+      <div class="section-label" id="preguntas-titulo">Preguntas específicas del cargo</div>
+      <div id="preguntas-cargo"></div>
+    </div>
+
+    <!-- EVALUACIÓN DEL ENTREVISTADOR -->
+    <div class="form-card">
+      <div class="section-label">Evaluación del entrevistador</div>
+      <div id="estrellas-entrevista"></div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="form-card">
+      <div class="f-field"><label class="f-label">Observaciones generales</label><textarea class="f-textarea" id="e-obs" placeholder="Impresiones, notas importantes, actitud general..."></textarea></div>
+      <div class="f-field"><label class="f-label">Nivel de responsabilidad percibido</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="e-resp" id="er1" value="Alto"><label for="er1">⬆️ Alto</label></div>
+          <div class="opt-btn"><input type="radio" name="e-resp" id="er2" value="Medio"><label for="er2">➡️ Medio</label></div>
+          <div class="opt-btn"><input type="radio" name="e-resp" id="er3" value="Bajo"><label for="er3">⬇️ Bajo</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-send" id="btn-e" onclick="enviarEntrevista()">Enviar entrevista →</button>
+</div>
+
+<!-- ═══════ SOLICITUDES ═══════ -->
+<div class="screen" id="s-solicitud">
+  <div class="sub-header">
+    <button class="btn-back" onclick="go('s-menu')">←</button>
+    <div class="sub-title">📝 Solicitudes y Reportes</div>
+  </div>
+  <div class="sub-body">
+    <div class="form-card">
+      <div class="f-field">
+        <label class="f-label">Tipo de solicitud</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st1" value="Memorando"><label for="st1">📄 Memorando</label></div>
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st2" value="Llamado de atención"><label for="st2">⚠️ Llamado</label></div>
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st3" value="Solicitud de reunión"><label for="st3">📅 Reunión</label></div>
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st4" value="Reporte de novedad"><label for="st4">🚨 Novedad</label></div>
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st5" value="Solicitud de compra"><label for="st5">🛒 Compra</label></div>
+          <div class="opt-btn"><input type="radio" name="s-tipo" id="st6" value="Otro"><label for="st6">📌 Otro</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="f-field">
+        <label class="f-label">Dirigido a</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="s-dir" id="sd1" value="Auxiliar administrativa"><label for="sd1">💼 Auxiliar</label></div>
+          <div class="opt-btn"><input type="radio" name="s-dir" id="sd2" value="Supervisora"><label for="sd2">👁️ Supervisora</label></div>
+          <div class="opt-btn"><input type="radio" name="s-dir" id="sd3" value="Gerencia / Propietario"><label for="sd3">🏢 Gerencia</label></div>
+          <div class="opt-btn"><input type="radio" name="s-dir" id="sd4" value="Colaborador específico"><label for="sd4">👤 Colaborador</label></div>
+        </div>
+      </div>
+      <div class="f-field"><label class="f-label">Nombre del colaborador (si aplica)</label><input type="text" class="f-input" id="s-colabs" placeholder="Nombre del colaborador"></div>
+    </div>
+    <div class="form-card">
+      <div class="f-field"><label class="f-label">Descripción / Motivo</label><textarea class="f-textarea" id="s-desc" placeholder="Explique con detalle..." style="min-height:100px;"></textarea></div>
+      <div class="f-field">
+        <label class="f-label">Urgencia</label>
+        <div class="opts-grid">
+          <div class="opt-btn"><input type="radio" name="s-urg" id="su1" value="Alta — hoy"><label for="su1">🔴 Alta</label></div>
+          <div class="opt-btn"><input type="radio" name="s-urg" id="su2" value="Media — esta semana"><label for="su2">🟡 Media</label></div>
+          <div class="opt-btn"><input type="radio" name="s-urg" id="su3" value="Normal"><label for="su3">🟢 Normal</label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-send" id="btn-s" onclick="enviarSolicitud()">Enviar solicitud →</button>
+</div>
+
+<!-- GRACIAS -->
+<div class="screen" id="s-gracias">
+  <div class="gracias" style="padding-top:80px;">
+    <div class="gracias-icon" id="g-icon">✅</div>
+    <div class="gracias-title" id="g-title">¡Enviado!</div>
+    <div class="gracias-msg" id="g-msg">Información enviada correctamente.</div>
+    <button class="btn-volver" onclick="go('s-menu')">← Volver al panel</button>
+  </div>
+</div>
+
+<script>
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzOkZPoJtf-twIFsGgWNTCer4Q6vjKbBrZDGGqB2r6IzLVONsV2lXmj-0IzEYeo0n0g/exec';
+const hoy = new Date();
+document.getElementById('fecha-header').textContent = hoy.toLocaleDateString('es-CO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// ── NAVEGACIÓN ──
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── PREGUNTAS POR CARGO ──
+const preguntasCargo = {
+  atencion_cliente: {
+    titulo: 'Preguntas — Atención al Cliente / Mesera',
+    preguntas: [
+      { q:'Un cliente le habla de forma grosera. ¿Qué hace?', ops:['Le respondo de la misma forma|2','Me mantengo calmada, lo atiendo bien y aviso a mi jefa si es necesario|10','Lo ignoro y sigo con mis otras mesas|4','Me pongo nerviosa y no sé cómo reaccionar|1'] },
+      { q:'¿Qué significa para usted dar un buen servicio?', ops:['Llevar los pedidos rápido y cobrar bien|5','Atender rápido, con buena actitud y estar pendiente del cliente|10','Ser amable solo cuando el cliente también lo es|3','Hacer lo que me pidan sin quejarme|4'] },
+      { q:'No sabe cómo se prepara un producto que le pidieron. ¿Qué hace?', ops:['Invento algo para no quedar mal|1','Pregunto de inmediato a quien sepa, sin pena|10','Le digo al cliente que no sé y ya|3','Busco la información antes de responderle|8'] },
+      { q:'¿Con qué frecuencia limpia su área durante el turno?', ops:['Constantemente, antes de que se vea sucia|10','Cuando termina cada cliente|7','Cuando me lo piden|3','Al final del turno|1'] },
+    ]
+  },
+  cocina: {
+    titulo: 'Preguntas — Cocina / Preparación de Alimentos',
+    preguntas: [
+      { q:'¿Tiene conocimiento de normas de higiene y manipulación de alimentos?', ops:['Sí, conozco y aplico las normas|10','Conozco algunas pero no todas|6','He escuchado de ellas pero no las aplico|3','No tengo conocimiento al respecto|1'] },
+      { q:'Está preparando un producto y nota que un ingrediente no se ve bien. ¿Qué hace?', ops:['Lo uso de todas formas para no retrasar|1','Lo retiro, aviso de inmediato y no lo uso|10','Trato de arreglarlo sin decir nada|3','Le pregunto a alguien antes de decidir|8'] },
+      { q:'¿Qué hace cuando tiene un plato en proceso y llega otro pedido urgente?', ops:['Me estreso y se me olvida uno|2','Organizo las prioridades y trabajo metódicamente|10','Dejo el urgente para después|3','Pido ayuda a una compañera|7'] },
+      { q:'¿Cómo garantiza que las porciones sean siempre las mismas?', ops:['Las hago a ojo según mi criterio|2','Uso los gramajes y recetas establecidos siempre|10','A veces mido, a veces no|4','Depende del tiempo que tenga|3'] },
+    ]
+  },
+  bebidas: {
+    titulo: 'Preguntas — Preparación de Bebidas',
+    preguntas: [
+      { q:'¿Tiene experiencia preparando bebidas calientes o frías (café, jugos, malteadas)?', ops:['Sí, tengo experiencia en cafetería o similar|10','He preparado en casa pero no profesionalmente|5','Solo café básico|3','No tengo experiencia en bebidas|1'] },
+      { q:'Un cliente dice que su bebida no está bien preparada. ¿Qué hace?', ops:['Le digo que así es como se prepara|1','Me disculpo, la preparo de nuevo y verifico la receta|10','Le ofrezco otra cosa diferente|5','Llamo a mi jefa para que ella decida|7'] },
+      { q:'¿Qué tan importante es para usted la presentación de una bebida?', ops:['Muy importante, es parte de la experiencia|10','Importante pero lo prioritario es el sabor|6','No le presto mucha atención|2','Solo importa si el cliente lo pide|3'] },
+      { q:'¿Cómo mantiene organizada y limpia su área de trabajo durante el turno?', ops:['La limpio constantemente entre preparación y preparación|10','Al final de cada turno|3','Cuando hay tiempo|4','Solo cuando mi jefa me lo pide|1'] },
+    ]
+  },
+  vitrinas: {
+    titulo: 'Preguntas — Vitrinas y Atención',
+    preguntas: [
+      { q:'¿Cómo haría para que un cliente que solo venía a mirar termine comprando algo?', ops:['Lo dejaría mirar tranquilo sin molestarlo|3','Le ofrezco los productos con entusiasmo y le cuento qué hay|10','Le digo los precios y espero|5','No sé, no soy muy de ventas|1'] },
+      { q:'Nota que un producto en vitrina lleva mucho tiempo y no ha rotado. ¿Qué hace?', ops:['Lo dejo ahí, no es mi decisión|2','Lo reporto a mi jefa de inmediato|10','Lo retiro sin decir nada|4','Espero a que me lo indiquen|5'] },
+      { q:'¿Con qué frecuencia verificaría el estado y presentación de la vitrina?', ops:['Constantemente durante el turno|10','Cada hora más o menos|7','Dos veces al día|4','Al inicio y al final del turno|3'] },
+      { q:'¿Conoce o ha trabajado con productos de panadería o pastelería?', ops:['Sí, tengo experiencia en ese tipo de productos|10','Conozco los productos pero nunca he trabajado con ellos|5','Muy poco|3','No los conozco|1'] },
+    ]
+  },
+  caja: {
+    titulo: 'Preguntas — Caja y Supervisión',
+    preguntas: [
+      { q:'Al recibir un billete de alta denominación, ¿qué hace?', ops:['Lo recibo y lo guardo directamente|2','Lo verifico con el detector o contra la luz antes de aceptarlo|10','Llamo a alguien para que lo revise|6','Lo devuelvo y pido otro método de pago|5'] },
+      { q:'Al final del turno la caja no cuadra. ¿Qué hace?', ops:['Pongo de mi bolsillo para que cuadre|3','Reviso detalladamente todas las transacciones y reporto la diferencia|10','Dejo la diferencia y lo digo al siguiente turno|4','Espero a que alguien más lo note|1'] },
+      { q:'¿Ha tenido a cargo personas o equipos de trabajo antes?', ops:['Sí, he liderado equipos de trabajo|10','He apoyado en supervisión ocasionalmente|6','No, pero me siento capaz de hacerlo|4','No y no me interesa|1'] },
+      { q:'Un cliente reclama que le cobraron más. ¿Cómo actúa?', ops:['Le digo que el precio es correcto y punto|2','Reviso la transacción con calma, le explico y corrijo si hay error|10','Llamo a mi jefa de inmediato sin revisar|5','Le doy la razón para evitar conflictos|3'] },
+    ]
+  },
+  aseo: {
+    titulo: 'Preguntas — Aseo y Servicios Generales',
+    preguntas: [
+      { q:'¿Cómo organiza sus tareas cuando tiene muchas cosas que limpiar al mismo tiempo?', ops:['Empiezo por lo que se ve más sucio|5','Sigo un orden lógico de las áreas más importantes a las menos urgentes|10','Limpio lo que esté más a mano|3','Espero instrucciones de mi jefa|4'] },
+      { q:'Nota que en un área hay charcos de agua en el piso. ¿Qué hace?', ops:['Los seco de inmediato para evitar accidentes|10','Los dejo para limpiarlos después|2','Aviso pero espero a que alguien más los limpie|4','Solo los limpio si me corresponde esa área|3'] },
+      { q:'¿Qué tan importante es para usted dejar los implementos en su lugar después de usarlos?', ops:['Muy importante, siempre los dejo organizados|10','Importante, aunque a veces se me olvida|5','No le presto mucha atención|2','Solo si me lo piden|1'] },
+      { q:'¿Ha trabajado antes en aseo de cocinas, negocios de alimentos o industria?', ops:['Sí, tengo experiencia en ese tipo de aseo|10','He hecho aseo general pero no en negocios de alimentos|5','Solo aseo doméstico|3','No tengo experiencia en aseo|1'] },
+    ]
+  }
+};
+
+let cargoActual = '';
+const puntajesCargo = {};
+
+function selCargo(input) {
+  cargoActual = input.value;
+  const data = preguntasCargo[cargoActual];
+  if(!data) return;
+
+  // Actualizar título
+  const nombres = {atencion_cliente:'Atención al Cliente',cocina:'Cocina',bebidas:'Prep. de Bebidas',vitrinas:'Vitrinas',caja:'Caja',aseo:'Aseo'};
+  document.getElementById('e-sub-title').textContent = '👤 Entrevista — '+nombres[cargoActual];
+  document.getElementById('preguntas-titulo').textContent = data.titulo;
+
+  // Construir preguntas
+  const wrap = document.getElementById('preguntas-cargo');
+  wrap.innerHTML = '';
+  puntajesCargo[cargoActual] = {};
+
+  data.preguntas.forEach((p,pi) => {
+    const div = document.createElement('div');
+    div.className = 'q-card';
+    const opsHtml = p.ops.map((op,oi) => {
+      const [txt,pts] = op.split('|');
+      const letra = ['A','B','C','D'][oi];
+      return `<div class="q-opt"><input type="radio" name="eq-${pi}" id="eq${pi}-${oi}" value="${pts}"><label for="eq${pi}-${oi}"><span class="ql">${letra}</span>${txt}</label></div>`;
+    }).join('');
+    div.innerHTML = `<div class="q-body"><div class="q-num">Pregunta ${pi+1}</div><div class="q-text">${p.q}</div><div class="q-opts">${opsHtml}</div></div>`;
+    wrap.appendChild(div);
+  });
+
+  go('s-entrevista');
+}
+
+function toggleExp(){
+  const v=document.querySelector('input[name="e-exp"]:checked');
+  document.getElementById('exp-det').style.display=(v&&v.value==='Sí')?'block':'none';
+}
+
+document.addEventListener('change',e=>{
+  if(e.target.name==='e-turno') document.getElementById('rest-wrap').style.display=e.target.value==='Con restricción'?'block':'none';
+});
+
+// ── ESTRELLAS DESEMPEÑO ──
+const critD=[{k:'puntualidad',l:'Puntualidad',d:'¿Llegó a tiempo?'},{k:'presentacion',l:'Presentación personal',d:'Uniforme, higiene, gorro'},{k:'actitud',l:'Actitud y servicio',d:'Trato con clientes y compañeros'},{k:'cumplimiento',l:'Cumplimiento de funciones',d:'¿Hizo su trabajo bien?'},{k:'limpieza',l:'Orden y limpieza',d:'¿Dejó todo organizado?'}];
+const svD={};critD.forEach(c=>svD[c.k]=0);
+
+const critE=[{k:'presentacion',l:'Presentación personal'},{k:'actitud',l:'Actitud y energía'},{k:'comunicacion',l:'Comunicación'},{k:'puntualidad',l:'Puntualidad a la cita'},{k:'impresion',l:'Impresión general'}];
+const svE={};critE.forEach(c=>svE[c.k]=0);
+
+const starLbls=['1 — Muy bajo','2 — Regular','3 — Aceptable','4 — Bueno','5 — Excelente'];
+
+function buildStars(criterios,vals,containerId){
+  const wrap=document.getElementById(containerId);
+  criterios.forEach(c=>{
+    const div=document.createElement('div');
+    div.style.marginBottom='14px';
+    div.innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:2px;">${c.l}</div>${c.d?`<div style="font-size:11px;color:var(--gray);margin-bottom:8px;">${c.d}</div>`:''}
+    <div class="star-row" id="sr-${containerId}-${c.k}"></div><div class="star-val" id="sv-${containerId}-${c.k}">Sin calificar</div>`;
+    wrap.appendChild(div);
+    const sr=document.getElementById('sr-'+containerId+'-'+c.k);
+    for(let i=1;i<=5;i++){
+      const b=document.createElement('button');
+      b.className='star';b.innerHTML='★';
+      b.onclick=()=>{
+        vals[c.k]=i;
+        sr.querySelectorAll('.star').forEach((s,j)=>s.classList.toggle('on',j<i));
+        document.getElementById('sv-'+containerId+'-'+c.k).textContent=starLbls[i-1];
+      };
+      sr.appendChild(b);
+    }
+  });
+}
+
+// ── CHECKLIST ──
+const bloques=[
+  {id:'apertura',titulo:'🌅 Apertura e inicio del día',color:'bh-gold',items:['Llegar con puntualidad y abrir el establecimiento','Revisar apariencia general del local','Verificar presentación personal y uniforme del equipo','Revisar disponibilidad de equipos: hornos, vitrinas, cafeteras','Verificar disponibilidad de productos en vitrina','Confirmar producción del día: pan, pastelería, productos especiales','Confirmar inventario básico de materias primas','Verificar que la caja tenga base de dinero para cambio','Verificar que vitrinas y exhibidores estén organizados y atractivos','Reunión breve con el equipo para coordinar el día']},
+  {id:'jornada',titulo:'☀️ Durante la jornada',color:'bh-blue',items:['Supervisar la atención al cliente en todo momento','Verificar que el personal esté ofreciendo productos activamente','Controlar orden y limpieza de mesas y vitrinas','Verificar rotación de productos en vitrina','Rotular los productos que lleguen con fecha de ingreso','Revisar constantemente inventario de productos en vitrina','Apoyar al equipo en momentos de mayor demanda','Supervisar manejo de caja y ventas','Escuchar y resolver quejas de clientes','Coordinar reposición de productos desde producción','Verificar cumplimiento de normas de higiene en todas las áreas']},
+  {id:'inventario',titulo:'📦 Control de inventario',color:'bh-teal',items:['Revisar inventario: harinas, margarina, levadura','Revisar inventario: huevos, quesos, embutidos, empaques','Informar productos que necesiten reposición','Identificar y retirar productos vencidos o en malas condiciones','Verificar rotación PEPS en todas las áreas']},
+  {id:'personal',titulo:'👥 Supervisión del personal',color:'bh-red',items:['Verificar puntualidad del equipo al inicio del turno','Verificar planillas y reportes de cada empleado','Evaluar actitud de servicio durante la jornada','Revisar trabajo en equipo y coordinación entre áreas','Dar retroalimentación cuando sea necesario','Motivar al equipo para mejorar las ventas']},
+  {id:'cierre',titulo:'🌙 Cierre del negocio',color:'bh-green',items:['Realizar arqueo de caja','Verificar registro de todas las ventas del día','Revisar productos sobrantes y organizarlos para mañana','Verificar limpieza de todas las áreas de trabajo','Apagar equipos eléctricos','Cerrar inventario de productos críticos','Reportar novedades del día a gerencia']},
+  {id:'reporte',titulo:'📊 Reporte diario',color:'bh-purple',esReporte:true,items:[]},
+];
+const estadoCK={};
+bloques.forEach(b=>b.items.forEach((_,i)=>estadoCK[b.id+'_'+i]=false));
+
+function buildChecklist(){
+  const body=document.getElementById('checklist-body');body.innerHTML='';
+  bloques.forEach(b=>{
+    const blk=document.createElement('div');blk.className='block';
+    if(b.esReporte){
+      blk.innerHTML=`<div class="block-head ${b.color}" onclick="toggleBlk(this)"><span class="block-icon">📊</span><span class="block-title">Reporte diario</span><span class="block-arrow">▼</span></div>
+      <div class="block-items"><div style="padding:14px;">
+        <div class="f-field"><label class="f-label">Ventas del día</label><input type="text" class="f-input" id="r-ventas" placeholder="$ Total vendido"></div>
+        <div class="f-field"><label class="f-label">Productos más vendidos</label><textarea class="f-textarea" id="r-mas" placeholder="¿Qué se vendió más hoy?"></textarea></div>
+        <div class="f-field"><label class="f-label">Productos con baja rotación</label><textarea class="f-textarea" id="r-menos" placeholder="Productos que no rotaron bien..."></textarea></div>
+        <div class="f-field"><label class="f-label">Quejas o comentarios de clientes</label><textarea class="f-textarea" id="r-quejas" placeholder="Quejas recibidas, sugerencias..."></textarea></div>
+        <div class="f-field"><label class="f-label">Novedades del personal</label><textarea class="f-textarea" id="r-personal" placeholder="Ausencias, tardanzas, situaciones..."></textarea></div>
+        <div class="f-field"><label class="f-label">Necesidades de compra</label><textarea class="f-textarea" id="r-compras" placeholder="Insumos que hay que pedir..."></textarea></div>
+        <div class="f-field"><label class="f-label">Observaciones generales</label><textarea class="f-textarea" id="r-obs" placeholder="Cualquier otra novedad del día..."></textarea></div>
+      </div></div>`;
+    } else {
+      const itemsHtml=b.items.map((it,i)=>`<div class="check-item" onclick="toggleCK('${b.id}',${i},this)"><div class="chk" id="chk-${b.id}-${i}"></div><div class="chk-label">${it}</div></div>`).join('');
+      blk.innerHTML=`<div class="block-head ${b.color}" onclick="toggleBlk(this)"><span class="block-icon">${b.titulo.split(' ')[0]}</span><span class="block-title">${b.titulo.slice(b.titulo.indexOf(' ')+1)}</span><span class="block-prog" id="prog-${b.id}">0/${b.items.length}</span><span class="block-arrow">▼</span></div><div class="block-items">${itemsHtml}</div>`;
+    }
+    body.appendChild(blk);
+  });
+  body.querySelector('.block-head')&&toggleBlk(body.querySelector('.block-head'));
+}
+
+function toggleBlk(head){const items=head.nextElementSibling;const arrow=head.querySelector('.block-arrow');items.classList.toggle('open');if(arrow)arrow.classList.toggle('open');}
+function toggleCK(blkId,idx,el){const key=blkId+'_'+idx;estadoCK[key]=!estadoCK[key];const chk=document.getElementById('chk-'+blkId+'-'+idx);const lbl=el.querySelector('.chk-label');chk.classList.toggle('on',estadoCK[key]);lbl.classList.toggle('done',estadoCK[key]);updateCKProg();}
+function updateCKProg(){const total=Object.keys(estadoCK).length;const done=Object.values(estadoCK).filter(Boolean).length;const pct=total?Math.round((done/total)*100):0;document.getElementById('ck-txt').textContent=`${done} de ${total} tareas completadas`;document.getElementById('ck-pct').textContent=pct+'%';document.getElementById('ck-fill').style.width=pct+'%';bloques.forEach(b=>{if(b.esReporte)return;const bd=b.items.filter((_,i)=>estadoCK[b.id+'_'+i]).length;const el=document.getElementById('prog-'+b.id);if(el)el.textContent=`${bd}/${b.items.length}`;});}
+
+// ── HELPERS ──
+function getR(n){const e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'-';}
+
+async function post(data,btnId,icon,title,msg){
+  const btn=document.getElementById(btnId);btn.textContent='Enviando...';btn.disabled=true;
+  try{
+    const url=ENDPOINT+'?'+new URLSearchParams(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,String(v)]))).toString();
+    const res=await fetch(url,{method:'GET'});
+    const json=await res.json();
+    if(json.result==='success'){document.getElementById('g-icon').textContent=icon;document.getElementById('g-title').textContent=title;document.getElementById('g-msg').textContent=msg;go('s-gracias');}
+    else alert('Error al enviar: '+(json.error||'intenta de nuevo.'));
+  }catch(e){alert('Sin conexión a internet o el script no está desplegado.');}
+  btn.textContent='Enviar →';btn.disabled=false;
+}
+
+async function enviarChecklist(){
+  const btn=document.getElementById('btn-ck');btn.textContent='Enviando...';btn.disabled=true;
+  const fecha=hoy.toLocaleDateString('es-CO');
+  let resumen='';
+  bloques.forEach(b=>{if(b.esReporte)return;resumen+=`\n${b.titulo}:\n`;b.items.forEach((it,i)=>{resumen+=(estadoCK[b.id+'_'+i]?'✓ ':'✗ ')+it+'\n';});});
+  const params=new URLSearchParams({
+    tipo:'checklist',Fecha:fecha,Checklist:resumen,
+    'Ventas_del_dia':document.getElementById('r-ventas')?.value||'-',
+    'Mas_vendidos':document.getElementById('r-mas')?.value||'-',
+    'Baja_rotacion':document.getElementById('r-menos')?.value||'-',
+    'Quejas':document.getElementById('r-quejas')?.value||'-',
+    'Novedades_personal':document.getElementById('r-personal')?.value||'-',
+    'Necesidades_compra':document.getElementById('r-compras')?.value||'-',
+    'Observaciones':document.getElementById('r-obs')?.value||'-'
+  });
+  try{
+    const res=await fetch(ENDPOINT+'?'+params.toString(),{method:'GET'});
+    const json=await res.json();
+    if(json.result==='success'){document.getElementById('checklist-body').style.display='none';document.getElementById('btn-ck').style.display='none';document.getElementById('gracias-ck').style.display='block';}
+    else alert('Error: '+(json.error||'intenta de nuevo.'));
+  }catch(e){alert('Sin conexión o script no desplegado.');}
+  btn.disabled=false;
+}
+
+function resetChecklist(){Object.keys(estadoCK).forEach(k=>estadoCK[k]=false);document.getElementById('checklist-body').style.display='block';document.getElementById('btn-ck').style.display='block';document.getElementById('gracias-ck').style.display='none';buildChecklist();updateCKProg();}
+
+async function enviarDesempeno(){
+  const nombre=document.getElementById('d-nombre').value.trim();if(!nombre){alert('Escribe el nombre.');return;}
+  const evalStr=critD.map(c=>`${c.l}: ${svD[c.k]}/5`).join(' | ');
+  const pct=Math.round((Object.values(svD).reduce((a,b)=>a+b,0)/(critD.length*5))*100);
+  await post({tipo:'desempeno',Fecha:hoy.toLocaleDateString('es-CO'),Colaborador:nombre,Cargo:getR('d-cargo'),Evaluacion:evalStr,Puntaje:pct+'%',Accion:getR('d-accion'),Observaciones:document.getElementById('d-obs').value||'-'},'btn-d','⭐','¡Evaluación enviada!',`La evaluación de ${nombre} fue registrada.`);
+}
+
+async function enviarEntrevista(){
+  const nombre=document.getElementById('e-nombre').value.trim();if(!nombre){alert('Escribe el nombre de la candidata.');return;}
+  const fecha=hoy.toLocaleDateString('es-CO');
+  const evalStr=critE.map(c=>`${c.l}: ${svE[c.k]}/5`).join(' | ');
+  const evalPct=Math.round((Object.values(svE).reduce((a,b)=>a+b,0)/(critE.length*5))*100);
+
+  // Puntaje preguntas cargo
+  let qPts=0,qMax=0;
+  if(cargoActual&&preguntasCargo[cargoActual]){
+    preguntasCargo[cargoActual].preguntas.forEach((_,pi)=>{
+      const sel=document.querySelector(`input[name="eq-${pi}"]:checked`);
+      if(sel){qPts+=parseInt(sel.value||0);qMax+=10;}
+    });
+  }
+  const qPct=qMax?Math.round((qPts/qMax)*100):0;
+  const total=Math.round((evalPct*0.4)+(qPct*0.6));
+  const veredicto=total>=80?'✅ MUY RECOMENDADA':total>=60?'🟡 VIABLE':total>=40?'🟠 CON RESERVAS':'❌ NO RECOMENDADA';
+
+  const nombresArea={atencion_cliente:'Atención al Cliente',cocina:'Cocina',bebidas:'Preparación de Bebidas',vitrinas:'Vitrinas',caja:'Caja',aseo:'Aseo'};
+  await post({
+    _subject:`👤 Entrevista — ${nombre} — ${nombresArea[cargoActual]||cargoActual} — ${total}% ${veredicto}`,
+    Fecha:fecha,Candidata:nombre,Celular:document.getElementById('e-tel').value||'-',
+    Edad:document.getElementById('e-edad').value||'-',Area:nombresArea[cargoActual]||cargoActual,
+    Hijos:getR('e-hijos'),Estado_civil:getR('e-estado'),Transporte:getR('e-trans'),
+    Turnos_rotativos:getR('e-turno'),Fines_de_semana:getR('e-fds'),Puede_empezar:getR('e-inicio'),
+    Experiencia:getR('e-exp'),Ultimo_trabajo:document.getElementById('e-ult').value||'-',
+    Duracion:document.getElementById('e-dur').value||'-',Motivo_retiro:document.getElementById('e-motivo').value||'-',
+    Referencia:document.getElementById('e-ref').value||'-',
+    Evaluacion_entrevistador:evalStr,Puntaje_eval:evalPct+'%',
+    Preguntas_cargo:qPct+'%',Aptitud_total:total+'% — '+veredicto,
+    Nivel_responsabilidad:getR('e-resp'),
+    Observaciones:document.getElementById('e-obs').value||'-',
+  },'btn-e','👤','¡Entrevista enviada!',`Los datos de ${nombre} fueron registrados. Aptitud: ${total}% — ${veredicto}`);
+}
+
+async function enviarSolicitud(){
+  const desc=document.getElementById('s-desc').value.trim();if(!desc){alert('Describe la solicitud.');return;}
+  const tipo=getR('s-tipo');
+  await post({tipo:'solicitud',Fecha:hoy.toLocaleDateString('es-CO'),Tipo:tipo,Dirigido_a:getR('s-dir'),Colaborador:document.getElementById('s-colabs').value||'-',Descripcion:desc,Urgencia:getR('s-urg')},'btn-s','📝','¡Solicitud enviada!','La solicitud fue registrada y enviada correctamente.');
+}
+
+// ── INIT ──
+buildChecklist();updateCKProg();
+buildStars(critD,svD,'estrellas-wrap');
+buildStars(critE,svE,'estrellas-entrevista');
+</script>
+</body>
+</html>
